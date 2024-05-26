@@ -1,8 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const routes = require('./src/routes/routes')
-const { logIn } = require('./src/controllers/userControllers')
-
+const { getPass } = require('./src/middlewares')
+ 
 // CONEXION MONGODB
 mongoose.connect(process.env.STRING_DB)
     .then(() => console.log('Conexión con MongoDB'))
@@ -11,10 +10,12 @@ mongoose.connect(process.env.STRING_DB)
 // INICIAR SERVIDOR
 const app = express()
 
+// SERVIR RUTAS
 // ruta de ingreso
-app.post('/login', logIn)
+app.post('/login', require('./src/controllers/userControllers').login)
 // rutas protegidas por token en gateway
-app.use('/users', routes)
+app.use(getPass)
+app.use('/users', require('./src/routes/routes'))
 
 // ESCUCHAR CONEXIONES
 const PORT = process.env.GATEWAY_URL.split(':')[1]

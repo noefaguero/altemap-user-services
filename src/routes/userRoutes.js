@@ -1,7 +1,8 @@
 const router = require('express').Router()
-const { logOut } = require('./controllers/userController')
+const { logout } = require('./controllers/userController')
 
-router.post('/logout', logOut)
+// el endpoint login se sirve en index.js
+router.post('/logout', logout)
 // router.all('/head', ) // gestion de autorizaciones como responsable de proyecto
 
 module.exports = router

@@ -1,21 +1,21 @@
 const jwt = require('jsonwebtoken')
 const accreditationServices = require('../services/accreditationServices')
 
-exports.getAllAccreditations = async ({ id_user }, res) => {
-    // obtener todas las autorizacion al inicio de sesion
-    const accreditations = await accreditationServices.getAllAccreditations(id_user)
-    res.json(accreditations)
+exports.getPotentialAccreditations = async (user_id) => {
+    // obtener proyectos asociados a un usuario, al inicio de sesion
+    return await accreditationServices.getPotentialAccreditations(user_id)  
 }
 
-exports.getOneAcreditation = async ({ role, id_user, id_proyect}, res) => {
+exports.getAccreditation = async ({ pass, params }, res) => {
   //  cambiar entre proyectos
-  const accreditation = await accreditationServices.getAccreditation(id_user, id_proyect)
-  res.json(response)
+  const response = await accreditationServices.getAccreditation(pass.user_id, params.project_id)
+  const accreditation = await response.json()
   // ocultar acreditacion en el token
-  const payload = { role: role, accreditation: accreditation }
+  const payload = { role: role, ...accreditation }
   
   const token = jwt.sign(
-    payload, process.env.JWT_SECRET, 
+    payload, 
+    process.env.JWT_SECRET, 
     // caduca en 1 semana
     { expiresIn: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60}
   )

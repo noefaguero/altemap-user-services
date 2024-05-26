@@ -1,7 +1,6 @@
 const router = require('express').Router()
-const { getAllAcreditations, getOneAcreditation } = require('./controllers/accreditationControllers')
+const { getAcreditation } = require('./controllers/accreditationControllers')
 
-router.get('/', getOneAcreditation)
-router.get('/all', getAllAcreditations)
+router.get('/:project', getAcreditation)
 
 module.exports = router
