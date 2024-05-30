@@ -17,7 +17,7 @@ const projectSchema = new Schema({
     },
     purpose: { 
         type: String, 
-        required: [true, 'El fin del proyecto es obligatorio'], 
+        required: [true, 'El objetivo del proyecto es obligatorio'], 
         enum: {
             values: ['economic', 'non-economic'],
             message: 'No existe el fin "{VALUE}"'
@@ -48,14 +48,18 @@ const projectSchema = new Schema({
         }
     },
     head_user: { 
-        type: Schema.Types.ObjectId, 
+        type: String, 
         ref: 'User', 
         required: [true, 'El responsable de proyecto es obligatorio']
     },
     partner_users: [{
-        type: Schema.Types.ObjectId, 
+        type: String, 
         ref: 'User'
     }]
+}, {
+    timestamps: true // createdAt y updatedAt
 })
 
-exports.Project = model('Project', projectSchema)
+const Project = model('Project', projectSchema)
+
+module.exports = Project

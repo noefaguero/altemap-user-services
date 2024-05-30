@@ -1,32 +1,5 @@
 const { Schema, model } = require('mongoose')
 
-const accreditationSchema = new Schema({
-    user_id: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true
-    },
-    head: {
-        type: Boolean,
-        required: true,
-    },
-    project_id: {
-        type: Schema.Types.ObjectId, 
-        ref: 'Project', 
-    },
-    user_fullname: {
-        type: String,
-        required: true,
-    },
-    project_name: {
-        type: String,
-        required: true,
-    },
-    tools: [
-        toolPermissionsSchema
-    ]
-})
-
 // subdocumento
 const toolPermissionsSchema = new Schema({
     tool_name: {
@@ -43,6 +16,38 @@ const toolPermissionsSchema = new Schema({
             message: 'No existe el permiso de tipo "{VALUE}"'
         }
     }
+}, { _id: false })
+
+const accreditationSchema = new Schema({
+    user_id: { 
+        type: String, 
+        ref: 'User', 
+        required: true
+    },
+    head: {
+        type: Boolean,
+        required: true,
+    },
+    project_id: {
+        type: String, 
+        ref: 'Project',
+        required: true 
+    },
+    user_fullname: {
+        type: String,
+        required: true,
+    },
+    project_name: {
+        type: String,
+        required: true,
+    },
+    tools: [
+        toolPermissionsSchema
+    ]
+}, {
+    timestamps: true // createdAt y updatedAt
 })
 
-exports.Accreditation = model('Accreditation', accreditationSchema)
+const Accreditation = model('Accreditation', accreditationSchema)
+
+module.exports = Accreditation

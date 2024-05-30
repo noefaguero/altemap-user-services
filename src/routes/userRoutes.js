@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { logout } = require('./controllers/userController')
+const { logout } = require('../controllers/userControllers')
 
 // el endpoint login se sirve en index.js
 router.post('/logout', logout)

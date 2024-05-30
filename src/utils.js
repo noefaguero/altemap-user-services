@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 
 // MUTACIONES EN DOCUMENTOS CON DEPENDENCIA
 exports.transaction = async (operations) => {
@@ -15,4 +16,18 @@ exports.transaction = async (operations) => {
     } finally {
       session.endSession()
     }
+}
+
+exports.createToken = (role, accreditation) => {
+  // ocultar acreditacion en el token
+  const payload = { role: role, ...accreditation }
+  
+  const token = jwt.sign(
+    payload, 
+    process.env.JWT_SECRET, 
+    // caduca en 1 semana
+    { expiresIn: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 }
+  )
+
+  return token
 }

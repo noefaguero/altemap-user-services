@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose')
+const { Schema, model} = require('mongoose')
 
 const userSchema = new Schema({
     id: { 
@@ -39,8 +39,13 @@ const userSchema = new Schema({
         required: [true, 'Rol de usuario obligatorio']
     },
     token: { 
-        type: String
+        type: String,
+        default: ''
     }
+}, {
+    timestamps: true // createdAt y updatedAt
 })
 
-exports.User = model('User', userSchema)
+const User = model('User', userSchema)
+
+module.exports = User

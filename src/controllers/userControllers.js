@@ -1,17 +1,33 @@
 const userServices = require('../services/userServices')
-const { getPotentialAccreditations } = require('./accreditationControllers')
+const { getPotentialAccreditations} = require('./accreditationControllers')
+const {createToken} = require('../utils')
 
 //LOGIN
-exports.login = async ({ body }, res) => {
-  const { email, password, keep } = body
+exports.login = async (req, res) => {
+  const { email, password, keep } = req.body
+
   // comprobar credenciales
   const user = await userServices.login(email, password)
-
   if (!user) {
-    res.status(400).json({ error: 'Revisa usuario y contraseña' })
+    res.json({ error: 'Revisa usuario y contraseña' })
+    return
   }
+
+  // acreditaciones posibles
   const accreditations = await getPotentialAccreditations(user.id)
-  res.json({ accreditations: accreditations, keep: keep })
+    if (!accreditations) {
+      res.json({ error: 'No tienes proyectos activos' })
+      return
+    }
+    console.log(accreditations[0])
+    // sacar token para el primer proyecto
+    const token = createToken(user.role, accreditations[0].project_id)
+    console.log(token)
+
+    const response = await userServices.saveToken(user.id, token)
+    if (response) {
+      res.json({ user: user, accreditations: accreditations, keep: keep, token: token})
+    }
 }
 
 // LOGOUT
