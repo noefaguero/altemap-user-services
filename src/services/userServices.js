@@ -8,16 +8,8 @@ exports.login = async (email, password) => {
     return await User.findOne({ email: email.toLowerCase(), password: password }, 'id role name last_name avatar').exec()
 }
 
-exports.saveToken = async (user_id, token) => {
-    return await User.findOneAndUpdate({ id: user_id }, {token: token})
-}
-
 exports.getUserByEmail = async (email) => {
     return await User.findOne({ email: email }, 'id name last_name').exec()
-}
-
-exports.logout = async (user_id) => {
-    return await User.findOneAndUpdate({ id: user_id }, { token: "" })
 }
 
 /* exports.transactionExample = async (user) => {

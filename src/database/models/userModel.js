@@ -1,11 +1,6 @@
 const { Schema, model} = require('mongoose')
 
 const userSchema = new Schema({
-    id: { 
-        type: String, 
-        required: [true, , 'ID de usuario obligatorio'],
-        unique: [true, 'El ID de usuario ya existe'] 
-    },
     name: { 
         type: String, 
         required: [true, 'Nombre obligatorio'],
@@ -37,10 +32,6 @@ const userSchema = new Schema({
             message: 'No existe el rol "{VALUE}"'
         },
         required: [true, 'Rol de usuario obligatorio']
-    },
-    token: { 
-        type: String,
-        default: ''
     }
 }, {
     timestamps: true // createdAt y updatedAt

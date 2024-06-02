@@ -1,7 +1,7 @@
 const router = require('express').Router()
-const { switchAccreditation } = require('../controllers/accreditationControllers')
+const { getAccreditation } = require('../controllers/accreditationControllers')
 
-router.get('/:project', switchAccreditation)
+router.get('/:id', getAccreditation)
 // to do: gestion de autorizaciones por responsable de proyecto
 
 module.exports = router

@@ -1,23 +1,19 @@
 const accreditationServices = require('../services/accreditationServices')
-const { saveToken } = require('../services/userServices')
-const createToken = require('../utils')
+const { createToken } = require('../utils')
 
-exports.getPotentialAccreditations = async (user_id) => {
+exports.getAccreditationsByUser = async (user_id) => {
   // obtener proyectos asociados a un usuario, al inicio de sesion
-  return await accreditationServices.getPotentialAccreditations(user_id) 
+  return await accreditationServices.getAccreditationsByUser(user_id) 
 }
 
-exports.switchAccreditation = async ({ pass, params }, res) => {
+exports.getAccreditation = async ({ params }, res) => {
   //  cambiar entre proyectos
-  const response = await accreditationServices.getAccreditation(pass.user_id, params.project_id)
-  if (!response) {
-    // manejar error
-    return
-  }
+  const acc = await accreditationServices.getAccreditation(params.id)
+  acc.user_id = acc.user_id.toJSON()
+  acc.project_id = acc.project_id.toJSON()
+  acc._id = acc._id.toJSON()
   
-  // sacar token
-  const token = createToken(pass.role, accreditation)
-  await saveToken(token)
-
-  res.json(accreditation) // para construir header del projecto
+  // crear token de permisos
+  const token = createToken(acc)
+  res.json({token: token})
 }

@@ -1,6 +1,6 @@
 const userServices = require('../services/userServices')
-const { getPotentialAccreditations} = require('./accreditationControllers')
-const {createToken} = require('../utils')
+const { getAccreditationsByUser } = require('./accreditationControllers')
+const { createToken } = require('../utils')
 
 //LOGIN
 exports.login = async (req, res) => {
@@ -13,25 +13,20 @@ exports.login = async (req, res) => {
     return
   }
 
-  // acreditaciones posibles
-  const accreditations = await getPotentialAccreditations(user.id)
-    if (!accreditations) {
-      res.json({ error: 'No tienes proyectos activos' })
-      return
-    }
-    console.log(accreditations[0])
-    // sacar token para el primer proyecto
-    const token = createToken(user.role, accreditations[0].project_id)
-    console.log(token)
+  // autorizacion
+  const accreditations = await getAccreditationsByUser(user._id)
+  if (!accreditations) {
+    res.json({ error: 'No tienes proyectos activos' })
+    return
+  }
 
-    const response = await userServices.saveToken(user.id, token)
-    if (response) {
-      res.json({ user: user, accreditations: accreditations, keep: keep, token: token})
-    }
-}
-
-// LOGOUT
-exports.logout = async ({ pass }, res) => {
-  const response = await userServices.logout(pass.user_id)
-  res.json(response)
+  // crear token de sesion
+  const token = createToken({ id: user._id.toJSON(), role: user.role })
+  
+  res.json({ 
+    user: user, 
+    accreditations: accreditations, 
+    keep: keep, 
+    token: token
+  })
 }

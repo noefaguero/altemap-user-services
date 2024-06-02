@@ -1,13 +1,13 @@
 const Accreditation = require('../database/models/accreditationModel')
 
-const getPotentialAccreditations = async (user_id) => {
-    // buscar todas las posibles acreditaciones de un usuario
-    return await Accreditation.find({ user_id: user_id }).exec()
+const getAccreditationsByUser = async (userId) => {
+    // buscar todas las acreditaciones de un usuario
+    return await Accreditation.find({ user_id: userId }, 'head _id project_name').lean()
 }
 
-const getAccreditation = async (user_id, project_id) => {
-    // obtener una acreditacion
-    return await Accreditation.findOne({ project_id: project_id, user_id: user_id }).exec()
+const getAccreditation = async (id) => {
+    // obtener una acreditacion para crear token de permisos
+    return await Accreditation.findOne({ _id: id }, 'head user_id project_id tools').lean()
 }
 
 const createAccreditation = async (accreditation) => {
@@ -15,7 +15,7 @@ const createAccreditation = async (accreditation) => {
 }
 
 module.exports = {
-    getPotentialAccreditations,
+    getAccreditationsByUser,
     getAccreditation,
     createAccreditation
 }

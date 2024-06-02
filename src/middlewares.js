@@ -1,6 +1,6 @@
-exports.getPass = () => {
-    return (req, res, next) => {
-      JSON.parse(req.headers['X-Pass'])
-      next()
-    }
+exports.knowUser = () => {
+  return (req, res, next) => {
+    req.user = req.headers['X-User']
+    next()
+  }
 }

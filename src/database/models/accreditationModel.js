@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose')
+const { Schema, model, SchemaTypes } = require('mongoose')
 
 // subdocumento
 const toolPermissionsSchema = new Schema({
@@ -20,7 +20,7 @@ const toolPermissionsSchema = new Schema({
 
 const accreditationSchema = new Schema({
     user_id: { 
-        type: String, 
+        type: SchemaTypes.ObjectId, 
         ref: 'User', 
         required: true
     },
@@ -29,7 +29,7 @@ const accreditationSchema = new Schema({
         required: true,
     },
     project_id: {
-        type: String, 
+        type: SchemaTypes.ObjectId, 
         ref: 'Project',
         required: true 
     },

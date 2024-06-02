@@ -18,11 +18,10 @@ exports.transaction = async (operations) => {
     }
 }
 
-exports.createToken = (role, accreditation) => {
-  // ocultar acreditacion en el token
-  const payload = { role: role, ...accreditation }
+exports.createToken = (payload) => {
   
   const token = jwt.sign(
+    // ocultar info de session o de acreditacion en el token
     payload, 
     process.env.JWT_SECRET, 
     // caduca en 1 semana

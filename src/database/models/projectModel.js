@@ -1,11 +1,6 @@
-const { Schema, model } = require('mongoose')
+const { Schema, model, SchemaTypes } = require('mongoose')
 
 const projectSchema = new Schema({
-    id: { 
-        type: String, 
-        required: true, 
-        unique: [true, 'El ID de proyecto ya existe'] 
-    },
     name: { 
         type: String, 
         required: [true, 'El nombre del proyecto es obligatorio'], 
@@ -48,12 +43,12 @@ const projectSchema = new Schema({
         }
     },
     head_user: { 
-        type: String, 
+        type: SchemaTypes.ObjectId, 
         ref: 'User', 
         required: [true, 'El responsable de proyecto es obligatorio']
     },
     partner_users: [{
-        type: String, 
+        type: SchemaTypes.ObjectId, 
         ref: 'User'
     }]
 }, {
