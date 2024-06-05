@@ -5,11 +5,17 @@ const startSession = require('mongoose').startSession
 
 exports.login = async (email, password) => {
     // buscar usuario
-    return await User.findOne({ email: email.toLowerCase(), password: password }, 'id role name last_name avatar').exec()
+    const doc = await User.findOne({ email: email.toLowerCase(), password: password }, '_id role name last_name avatar').lean()
+    doc._id = doc._id.toHexString()
+    
+    return doc
 }
 
-exports.getUserByEmail = async (email) => {
-    return await User.findOne({ email: email }, 'id name last_name').exec()
+exports.getUserByEmail = async (id) => {
+    const doc = await User.findById(id, '_id name last_name email avatar').lean()
+    doc._id = doc._id.toHexString()
+    
+    return doc
 }
 
 /* exports.transactionExample = async (user) => {

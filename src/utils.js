@@ -27,6 +27,6 @@ exports.createToken = (payload) => {
     // caduca en 1 semana
     { expiresIn: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 }
   )
-
+  
   return token
 }
