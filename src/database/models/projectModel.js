@@ -1,8 +1,9 @@
 const { Schema, model, SchemaTypes } = require('mongoose')
 
+
 const projectSchema = new Schema({
     name: { 
-        type: String, 
+        type: SchemaTypes.String, 
         required: [true, 'El nombre del proyecto es obligatorio'], 
         minLength: 3,
         maxLenght: 12
@@ -11,45 +12,37 @@ const projectSchema = new Schema({
         type: Buffer
     },
     purpose: { 
-        type: String, 
+        type: SchemaTypes.String, 
         required: [true, 'El objetivo del proyecto es obligatorio'], 
         enum: {
             values: ['economic', 'non-economic'],
-            message: 'No existe el fin "{VALUE}"'
+            message: props => `No existe el fin ${props.value}`
         }
     },
     topic: { 
-        type: String, 
+        type: SchemaTypes.String, 
         required: [true, 'El tema del proyecto es obligatorio'], 
         minLength: [5, 'El tema del proyecto ocupar 10 caracteres']
     },
     domain: { 
-        type: String, 
+        type: SchemaTypes.String, 
         required: [true, 'El dominio es obligatorio'], 
         match: [/^[\w.-]+(?:\.[\w\.-]+)+$/, 'Dominio no válido']
     },
-    has_tools: {
-        contents: {
-            type: Boolean, 
-            required: true,
-        },
-        forms: {
-            type: Boolean, 
-            required: true,
-        },
-        soon: {
-            type: Boolean, 
-            required: true,
-        }
+    tools: {
+        contents: { type: SchemaTypes.Boolean, required: true },
+        forms: { type: SchemaTypes.Boolean, required: true },
+        seo: { type: SchemaTypes.Boolean, required: true } // no desarrollado
     },
     head_user: { 
         type: SchemaTypes.ObjectId, 
         ref: 'User', 
         required: [true, 'El responsable de proyecto es obligatorio']
     },
-    partner_users: [{
+    // acreditaciones solo de colaboracion
+    col_accreditations: [{
         type: SchemaTypes.ObjectId, 
-        ref: 'User'
+        ref: 'Accreditation'
     }]
 }, {
     timestamps: true // createdAt y updatedAt

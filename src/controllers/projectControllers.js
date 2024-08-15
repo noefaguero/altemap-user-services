@@ -1,11 +1,16 @@
 const projectServices = require('../services/projectServices')
 
-exports.getOriginsByTool = async ({ params }, res) => {
-    const response = await projectServices.getOriginsByTool(params.tool)
-    res.json(response)
+const getDomains = async (req, res) => {
+    const objects = await projectServices.getDomains()
+    // filtro de origenes validos segun entorno
+    const domainField = process.env.NODE_ENV !== 'development' ? 'domain' : 'dev_domain'
+
+    const origins = objects.filter(object => object[domainField]) // se descartan undefined
+        .map(object => `${process.env.PROTOCOL}://${object[domainField]}`)
+    
+    res.json({ origins })
 }
 
-exports.getOrigins = async (req, res) => {
-    const response = await projectServices.getOrigins()
-    res.json(response)
+module.exports = {
+    getDomains
 }

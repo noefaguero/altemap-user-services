@@ -1,25 +1,15 @@
 const Project = require('../database/models/projectModel')
 
-// Solo al levantar el servidor
-const getOrigins = () => {
-    const tools = ['contents', 'forms', 'soon']
-    const originsByTool = {}
-
-    tools.forEach(async tool => {
-        originsByTool[tool] = await getOriginsByTool(tool)
-    })
-    
-    return originsByTool
+// al levantar el servidor y ante evento de nuevo proyecto
+const getDomains = async () => {
+    return await Project.find({}, 'domain dev_domain').lean()
 }
 
-const getOriginsByTool = async (tool) => {
-    const query = {}
-    query[`has_tools.${tool}`] = true
-    const domain = await Project.find(query, 'domain').exec()
-    return `${process.env.PROTOCOL}://${domain}`
+const getProjectById = async (id) => {
+    return await Project.findById(id).lean()
 }
 
 module.exports = {
-    getOrigins,
-    getOriginsByTool
+    getDomains,
+    getProjectById
 }

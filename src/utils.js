@@ -18,14 +18,12 @@ exports.transaction = async (operations) => {
     }
 }
 
-exports.createToken = (payload) => {
+exports.createToken = (payload, exp) => {
   
   const token = jwt.sign(
-    // ocultar info de session o de acreditacion en el token
-    payload, 
+    payload, // ocultar info de session o de acreditacion en el token
     process.env.JWT_SECRET, 
-    // caduca en 1 semana
-    { expiresIn: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 }
+    { expiresIn: exp } // caduca en 1 semana
   )
   
   return token

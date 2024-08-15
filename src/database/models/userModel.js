@@ -1,38 +1,44 @@
-const { Schema, model} = require('mongoose')
+const { Schema, model, SchemaTypes } = require('mongoose')
 
 const userSchema = new Schema({
-    name: { 
-        type: String, 
+    name: {
+        type: SchemaTypes.String,
         required: [true, 'Nombre obligatorio'],
         minLength: [3, 'El nombre ser mayor de 3 letras'],
         maxLength: [12, 'El nombre no puede ser menor de 3 letras'],
         match: [/[a-záéíóúüñ]/i, 'El nombre contiene caracteres no permitidos']
     },
-    last_name: { 
-        type: String, 
+    last_name: {
+        type: SchemaTypes.String,
         required: false,
         minLength: [3, 'El apellido no puede ser menor de 3 letras'],
         maxLength: [12, 'El apellido no puede ser mayor 12 letras'],
         match: [/[a-záéíóúüñ]/i, 'El apellido contienen caracteres no permitidos']
     },
-    email: { 
-        type: String, 
+    email: {
+        type: SchemaTypes.String,
         required: [true, 'Email de usuario obligatorio'],
         unique: [true, 'El correo ya existe'],
         match: [/^(([^<>()\[\]\\.,:\s@"]+(\.[^<>()\[\]\\.,:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 'Correo no válido']
     },
-    password: { 
-        type: String, 
+    password: {
+        type: SchemaTypes.String,
         required: [true, 'Contraseña de usuario obligatoria']
     },
-    role: { 
-        type: String, 
+    role: {
+        type: SchemaTypes.String,
         enum: {
             values: ['admin', 'user'],
-            message: 'No existe el rol "{VALUE}"'
+            message: props => `No existe el rol ${props.value}`
         },
         required: [true, 'Rol de usuario obligatorio']
-    }
+    },
+    avatar: {
+        type: SchemaTypes.String
+    },
+    accreditations: [{
+            type: SchemaTypes.ObjectId, ref: 'Accreditation'
+    }]
 }, {
     timestamps: true // createdAt y updatedAt
 })
