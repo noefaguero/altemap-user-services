@@ -14,5 +14,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/', require('./routes'))
 
 // ESCUCHAR CONEXIONES
-const PORT = process.env.USER_URL.split(':')[2]
-app.listen(PORT, () => console.log(`\t-> USER-SERVICES en el puerto ${PORT}`))
+const URL = process.env.USER_URL
+const PORT = URL.split(':')[2]
+app.listen(PORT, () => console.log(`\n\t\x1b[1m%s\x1b[0m \n\t-> Local: ${URL}\n`, 'USER-SERVICES READY'))

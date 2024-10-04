@@ -13,7 +13,7 @@ const userSchema = new Schema({
         required: false,
         minLength: [3, 'El apellido no puede ser menor de 3 letras'],
         maxLength: [12, 'El apellido no puede ser mayor 12 letras'],
-        match: [/[a-záéíóúüñ]/i, 'El apellido contienen caracteres no permitidos']
+        match: [/[a-záéíóúüñ]/i, 'El apellido contiene caracteres no permitidos']
     },
     email: {
         type: SchemaTypes.String,
