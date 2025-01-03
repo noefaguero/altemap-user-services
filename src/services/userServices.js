@@ -1,12 +1,7 @@
 const User = require('../database/models/userModel')
 
-const { transaction } = require('../utils')
-const startSession = require('mongoose').startSession
-
 exports.userLogin = async (email, password) => {
     return await User.findOne({ email: email, password: password }, '-password').populate('accreditations').lean()
-    /* doc._id = doc._id.toHexString()
-    return doc */
 }
 
 exports.getUserById = async (id) => {
@@ -16,9 +11,3 @@ exports.getUserById = async (id) => {
 /* exports.addPartner = async (user) => {
     ENVIAR MAIL
 } */
-
-
-
-
-
-

@@ -21,7 +21,8 @@ const accreditationSchema = new Schema({
         required: true 
     },
     permission: { 
-        type: SchemaTypes.Map, // JSON variable segun las tools asociadas al proyecto
+        type: SchemaTypes.Map, // relacion herramienta-permiso
+        of: SchemaTypes.String,
         required: true,
         validate: {
             validator: (value) => {

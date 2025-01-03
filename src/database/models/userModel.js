@@ -18,8 +18,11 @@ const userSchema = new Schema({
     email: {
         type: SchemaTypes.String,
         required: [true, 'Email de usuario obligatorio'],
-        unique: [true, 'El correo ya existe'],
-        match: [/^(([^<>()\[\]\\.,:\s@"]+(\.[^<>()\[\]\\.,:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 'Correo no válido']
+        unique: [true, 'El correo introducido ya existe'],
+        match: [
+            /^(([^<>()\[\]\\.,:\s@"]+(\.[^<>()\[\]\\.,:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 
+            'Correo electrónico no válido'
+        ]
     },
     password: {
         type: SchemaTypes.String,
@@ -34,10 +37,15 @@ const userSchema = new Schema({
         required: [true, 'Rol de usuario obligatorio']
     },
     avatar: {
-        type: SchemaTypes.String
+        type: SchemaTypes.String, // https://api.altemap.com/avatar/8e4a953b-e810-4267-9c74-38054f44a7f3.jpg
+        match: [
+            /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/, 
+            'URL no válida'
+        ]
     },
     accreditations: [{
-            type: SchemaTypes.ObjectId, ref: 'Accreditation'
+        type: SchemaTypes.ObjectId, 
+        ref: 'Accreditation'
     }]
 }, {
     timestamps: true // createdAt y updatedAt

@@ -4,11 +4,10 @@ const { createToken } = require('../utils')
 //LOGIN
 const userLogin = async (req, res) => {
 	const { email, password, keep } = req.body
-
 	// comprobar credenciales
 	const user = await userServices.userLogin(email, password)
 	if (!user) {
-		res.status(401).json({ error: 'Revisa usuario y contraseña' })
+		res.status(401).json({ error: 'El correo electrónico o la contraseña no coinciden.' })
 		return
 	}
 
@@ -30,10 +29,12 @@ const userLogin = async (req, res) => {
 	})
 }
 
+
 const getUserById = async (req, res) => {
 	const user = await userServices.getUserById(req.get('X-User'))
 	res.json(user)
 }
+
 
 module.exports = {
 	userLogin,
