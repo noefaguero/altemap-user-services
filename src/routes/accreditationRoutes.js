@@ -1,8 +1,8 @@
 const router = require('express').Router()
-const { updateToken } = require('../controllers/accreditationControllers')
+const { changeWorkspace } = require('../controllers/accreditationControllers')
 
-router.put('/token/:id', updateToken)
+router.put('/token/:id', changeWorkspace)
 
-// to do: gestion de autorizaciones por responsable de proyecto
+// to-do: gestion de autorizaciones por responsable de proyecto
 
 module.exports = router

@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken')
 
-exports.createToken = (payload, exp) => {
+exports.generateToken = (payload, exp) => {
 
 	const token = jwt.sign(
 		payload, // ocultar info de session y acreditacion en el token
 		process.env.JWT_SECRET,
-		{ expiresIn: exp } // caduca en 1 semana
+		{ expiresIn: exp }
 	)
 
 	return token
