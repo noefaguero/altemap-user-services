@@ -1,13 +1,16 @@
 const router = require('express').Router()
 const { userLogin } = require('../controllers/userControllers')
-const { knowUser } = require('../middlewares')
+const { refreshSession } = require('../controllers/sessionControllers')
+const { passLog } = require('../middlewares')
 
-router.post('/login', userLogin)
+router.post('/user-services/session', userLogin)
+router.put('/user-services/session', refreshSession)
 
-router.use(knowUser())
-router.use('/user-services/users', require('./userRoutes'))
+
+router.use(passLog())
 router.use('/user-services/accreditations', require('./accreditationRoutes'))
 router.use('/user-services/projects', require('./projectRoutes'))
+
 
 
 module.exports = router

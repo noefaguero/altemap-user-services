@@ -1,14 +1,10 @@
 const Session = require('../database/models/sessionModel')
 
-const createSession = async (userId, refreshToken, expiresAt) => {
+const createSession = async (data) => {
     try {
-        const session = new Session({
-            user: userId,
-            refresh_token: refreshToken,
-            expiresAt
-        })
-        await session.save()
-        return session
+        const newSession = new Session(data)
+        return await newSession.save()
+
     } catch (error) {
         throw error
     }
@@ -18,7 +14,7 @@ const createSession = async (userId, refreshToken, expiresAt) => {
 // devuelve objeto de session
 const validateToken = async (oldToken) => {
     try {
-        const session = await Session.findOne({ refresh_token: oldToken, expiresAt: { $gt: Date.now() } })
+        const session = await Session.findOne({ refresh_token: oldToken, expires_at: { $gt: Date.now() } }).lean()
         return session
     } catch (error) {
         throw error
@@ -30,7 +26,7 @@ const rotateRefreshToken = async (oldToken, newToken) => {
     try {
         const result = await Session.findOneAndUpdate(
             { refresh_token: oldToken },
-            { refresh_token: newToken }
+            { refresh_token: newToken, last_rotated_at: Date.now() },
         )
         return result
     } catch {
@@ -38,7 +34,7 @@ const rotateRefreshToken = async (oldToken, newToken) => {
     }
 }
 
-const logout = async (refreshToken) => {
+const deleteSession = async (refreshToken) => {
     try {
         // revocar el token
         const result = await Session.deleteOne({ refresh_token: refreshToken })
@@ -53,5 +49,5 @@ module.exports = {
     validateToken,
     createSession,
     rotateRefreshToken,
-    logout
+    deleteSession
 }

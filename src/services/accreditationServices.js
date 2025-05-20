@@ -6,7 +6,8 @@ const getAccreditation = async (id) => {
 }
 
 const createAccreditation = async (accreditation) => {
-    return await Accreditation.create({ accreditation })
+    const newAcc = new Accreditation(accreditation)
+    return await newAcc.save()
 }
 
 module.exports = {

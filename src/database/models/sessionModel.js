@@ -11,18 +11,20 @@ const sessionSchema = new Schema({
         required: true,
         unique: true
     },
-    expiresAt: {
+    expires_at: {
         type: Date,
         required: true
     },
-    // para inactividad: se actualiza en cada rotación
-    lastRotatedAt: { type: Date, default: Date.now }
+    // para inactividad
+    last_rotated_at: { type: Date, default: Date.now }
 })
 
 // Indices TTL
-// expira cuando llega a expiresAt
-sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
-// expira por inactividad 14 días después de lastRotatedAt
-sessionSchema.index({ lastRotatedAt: 1 }, { expireAfterSeconds: 14 * 24 * 60 * 60 })
+// expira cuando llega a expires_at
+sessionSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 })
+// expira por inactividad 14 días después de last_rotated_at
+sessionSchema.index({ last_rotated_at: 1 }, { expireAfterSeconds: 14 * 24 * 60 * 60 })
 
-module.exports = model("Session", sessionSchema)
+const Session = model("Session", sessionSchema)
+
+module.exports = Session
