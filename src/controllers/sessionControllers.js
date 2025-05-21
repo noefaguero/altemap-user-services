@@ -1,9 +1,12 @@
 const sessionServices = require('../services/sessionServices')
 const userControllers = require('./userControllers')
+const accreditationControllers = require('./accreditationControllers')
 const { generateToken } = require('../utils/helpers')
 const { SECURE_COOKIE } = require('../utils/constants')
+const jwt = require('jsonwebtoken')
 
 // HANDLERS
+
 const createTokens = async (user, role, project, permission, keep, exp = null) => {
     try {
         const payload = { user, role }
@@ -87,10 +90,56 @@ const createSession = async (user, keep, res) => {
 
 // CONTROLLERS
 
+// Autenticación
+// accessToken (usuario y rol en payload, proyecto y permisos)
+// refreshToken si el usuario selecciona "mantener sesión" (usuario y rol en payload)
+const login = async (req, res) => {
+    try {
+        const email = req.body.email
+        const password = req.body.password
+        const keep = req.body.keep
+        
+        // validación
+        if (!email || !password) {
+            res.status(400).json({ error: 'Se requiere email y password' })
+        }
+
+        // comprobar credenciales
+        const user = await userControllers.userLogin(email, password)
+        if (!user) {
+            res.status(401).json({ error: 'El correo electrónico o la contraseña no coinciden.' })
+        }
+
+        // crear sesion
+        const { createSession } = require('../controllers/sessionControllers')
+        const session = await createSession(user, keep, res)
+        if (!session) {
+            res.status(500).json({ error: 'Error al iniciar sesión.' })
+        }
+        res.json(session)
+        
+    } catch (error) {
+        console.error('Error al iniciar sesión:', error)
+        res.status(500).json({ error: 'Error al iniciar sesión.' })
+    }
+}
+
+
 // Generar token de acceso a partir de refresh token
 const refreshSession = async (req, res) => {
     try {
-        const { old_refresh_token, payload, exp } = req.body
+        const refreshToken = req.body.refresh_token
+        const payload = req.body.payload
+        const exp = req.body.exp
+        
+        // validación
+        if (!refreshToken || !payload || !exp) {
+            res.status(400).json({ error: 'Se requiere refresh_token, payload y exp' })
+        }
+        
+        if (!payload.user || !payload.role) {
+            res.status(400).json({ error: 'El payload debe contener user y role' })
+        }
 
         // recupera la informacion del usuario
         const user = await userControllers.getUserById(payload.user)
@@ -111,7 +160,7 @@ const refreshSession = async (req, res) => {
         )
 
         // rotar el token de refresco en la base de datos
-        await sessionServices.rotateRefreshToken(old_refresh_token, newRefreshToken)
+        await sessionServices.rotateRefreshToken(refreshToken, newRefreshToken)
 
         // tiempo restante hasta la expiración del refresh token
         const currentTime = Math.floor(Date.now() / 1000) // segundos
@@ -142,16 +191,55 @@ const refreshSession = async (req, res) => {
     }
 }
 
+// Crear token access con permisos de otro proyecto
+const switchWorkspace = async (req, res) => {
+    try {
+        const accId = req.body.acc_id
+        const accessToken = req.cookies.access_token
+        
+        // validación
+        if (!accId || !accessToken) {
+            res.status(400).json({ error: 'Se requiere acc_id y access_token' })
+        }
+        
+        const acc = await accreditationControllers.getAccreditation(project_id)
+        const decode = jwt.decode(accessToken, process.env.JWT_SECRET)
+
+        // crear token con permisos
+        const payload = {
+            user: decode.user,
+            role: decode.role,
+            project: acc.project_id.toHexString(),
+            permission: acc.permission
+        }
+
+        const newAccessToken = generateToken(payload, parseInt(decode.exp))
+
+        res.cookie('access_token', newAccessToken, {
+            httpOnly: true,
+            secure: SECURE_COOKIE,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 hora
+        })
+
+        res.json({ current_acc: acc })
+        
+    } catch (error) {
+        console.error('Error al cambiar de espacio de trabajo:', error)
+        res.status(500).json({ error: 'Error al cambiar de espacio de trabajo' })
+    }
+}
 
 const logout = async (req, res) => {
     try {
-        const refresh_token = req.cookies.refresh_token
-        if (!refresh_token) {
-            return res.status(400).json({ error: "Refresh token requerido" })
+        const refreshToken = req.cookies.refresh_token
+
+        if (!refreshToken) {
+            res.status(400).json({ error: "Refresh token requerido" })
         }
 
         // revocar refresh token en la base de datos
-        await sessionServices.deleteSession(refresh_token)
+        await sessionServices.deleteSession(refreshToken)
         
         // eliminar las cookies en el navegador
         res.clearCookie('refresh_token')
@@ -168,5 +256,6 @@ const logout = async (req, res) => {
 module.exports = {
     createSession,
     refreshSession,
+    switchWorkspace,
     logout
 }

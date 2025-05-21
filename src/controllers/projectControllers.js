@@ -2,6 +2,7 @@ const projectServices = require('../services/projectServices')
 
 const getDomains = async (req, res) => {
     try {
+        // No requiere parámetros específicos para esta función
         const objects = await projectServices.getDomains()
         // filtro de origenes validos segun entorno
         const domainField = process.env.NODE_ENV !== 'development' ? 'domain' : 'dev_domain'
