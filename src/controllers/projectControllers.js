@@ -14,7 +14,7 @@ const getDomains = async (req, res) => {
 
     } catch (error) {
         console.error('Error al obtener dominios válidos:', error)
-        res.status(500).json({ error: 'Error al obtener dominios válidos' })
+        res.status(500)
     }
 }
 

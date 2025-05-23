@@ -1,6 +1,6 @@
 const accreditationServices = require('../services/accreditationServices')
 
-// HANDLERS
+// USE CASES
 const getAccreditation = async (project_id) => {
 	try {
 		return await accreditationServices.getAccreditation(project_id)

@@ -1,9 +1,10 @@
 const router = require('express').Router()
-const { login, refreshSession, switchWorkspace, logout } = require('../controllers/sessionControllers')
+const { login, recoverSession, switchWorkspace, logout } = require('../controllers/sessionControllers')
 
-router.post('/user-services/session', login)
-router.put('/user-services/session/refresh', refreshSession)
-router.put('/user-services/session/workspace', switchWorkspace)
-router.delete('/user-services/session', logout)
+router.post('/', login)
+router.get('/', recoverSession)
+router.put('/workspace', switchWorkspace)
+router.delete('/', logout)
+
 
 module.exports = router

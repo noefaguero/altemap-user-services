@@ -1,10 +1,9 @@
 const userServices = require('../services/userServices')
 
-// HANDLERS
+// USE CASES
 const getUserById = async (id) => {
 	try {
-		const user = await userServices.getUserById(id)
-		return user
+		return await userServices.getUserById(id)
 	} catch (error) {
 		console.error('Error al obtener el usuario:', error)
 		return null
