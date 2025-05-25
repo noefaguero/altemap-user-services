@@ -5,6 +5,10 @@ const { generateToken } = require('../utils/helpers')
 const { SECURE_COOKIE } = require('../utils/constants')
 const jwt = require('jsonwebtoken')
 
+const getCookie = (cookies, name) => {
+    if (!cookies) return
+    return cookies.split(';').find(row => row.startsWith(name))?.substring(name.length + 1)
+}
 // USE CASES
 const createTokens = (user, role, project, permission, keep, exp = null) => {
     try {
@@ -37,7 +41,7 @@ const createTokens = (user, role, project, permission, keep, exp = null) => {
 }
 
 
-const createSession = async (user, keep, res) => {
+const createSession = async (user, defaultAcc, keep, res) => {
     try {
         const { accessToken, refreshToken } = createTokens(
             user._id.toHexString(),
@@ -137,12 +141,12 @@ const login = async (req, res) => {
         // acceso por defecto al primer proyecto
         const defaultAcc = user.accreditations[0]
 
-        await createSession(user, keep, res)
+        await createSession(user, defaultAcc, keep, res)
             
-        return {
+        res.json({
             ...user,
             current_acc: defaultAcc
-        }
+        })
         
     } catch (error) {
         console.error('Error al iniciar sesión:', error)
@@ -153,24 +157,28 @@ const login = async (req, res) => {
 // Recuperar session por access token o solo refresh token
 const recoverSession = async (req, res) => {
     try {
-        const accessToken = req.body.access_token
-        const refreshToken = req.body.refresh_token
-        const payload = req.body.payload
-        const exp = req.body.exp
+        const accessToken = getCookie(req.headers.cookie, 'access_token')
+        const refreshToken = getCookie(req.headers.cookie, 'refresh_token')
 
         // validación
         if (!refreshToken && !accessToken) {
             return res.status(400).json({ error: 'Se requiere access_token o refresh_token' })
         }
-
-        if (!payload || !exp) {
-            return res.status(400).json({ error: 'Se requieren los campos payload y exp' })
-        }
         
         // recupera la informacion del usuario
-        const user = await userControllers.getUserById(payload.user)
+        const user = await userControllers.getUserById(req.user)
         if (!user || Object.keys(user).length === 0) {
             return res.status(404).json({ error: 'Usuario no encontrado' })
+        }
+
+        // expiración del refresh token
+        let exp
+        if (refreshToken) {
+            const session = await sessionServices.getSessionByRefreshToken(refreshToken)
+            if (!session) {
+                return res.status(401).json({ error: 'Refresh token inválido' })
+            }
+            exp = session.expires_at.getTime()
         }
 
         // acceso por defecto al primer proyecto
@@ -180,13 +188,13 @@ const recoverSession = async (req, res) => {
             const { 
                 accessToken: newAccessToken, 
                 refreshToken: newRefreshToken 
-            } = await createTokens(
-                payload.user,
-                payload.role,
+            } = createTokens(
+                req.pass.user,
+                req.pass.role,
                 defaultAcc.project_id.toHexString(),
                 defaultAcc.permission,
                 true,
-                parseInt(exp)
+                exp
             )
 
             await refreshSession(exp, newAccessToken, newRefreshToken, res)
@@ -199,7 +207,7 @@ const recoverSession = async (req, res) => {
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error)
-        res.status(500)
+        res.status(500).json({ error: "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde."})
     }
 }
 
@@ -208,7 +216,7 @@ const recoverSession = async (req, res) => {
 const switchWorkspace = async (req, res) => {
     try {
         const accId = req.body.acc_id
-        const accessToken = req.cookies.access_token
+        const accessToken = req.cookies?.access_token
         
         // validación
         if (!accId || !accessToken) {
@@ -239,13 +247,13 @@ const switchWorkspace = async (req, res) => {
         
     } catch (error) {
         console.error('Error al cambiar de espacio de trabajo:', error)
-        res.status(500)
+        res.status(500).json({ error: "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde."})
     }
 }
 
 const logout = async (req, res) => {
     try {
-        const refreshToken = req.cookies.refresh_token
+        const refreshToken = req.cookies?.refresh_token
 
         if (!refreshToken) {
             return res.status(400).json({ error: "Refresh token requerido" })
@@ -262,7 +270,7 @@ const logout = async (req, res) => {
 
     } catch (error) {
         console.error('Error al cerrar sesión:', error)
-        res.status(500)
+        res.status(500).json({ error: "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde."})
     }
 }
 

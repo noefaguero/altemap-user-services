@@ -1,15 +1,9 @@
 const router = require('express').Router()
-const { passLog } = require('../middlewares')
+const { passLogger, reqLogger } = require('../middlewares')
 
-if (process.env.NODE_ENV === 'development') {
-    router.use((req, res, next) => {
-        console.log(`REQUEST: ${req.protocol}://${req.get('Host')}${req.originalUrl}`)
-        console.log(req.body ? `body: ${JSON.stringify(req.body)}` : '')
-        next()
-    })
-}
+router.use(reqLogger()) // dev mode
+router.use(passLogger())
 
-router.use(passLog())
 router.use('/user-services/session', require('./sessionRoutes'))
 router.use('/user-services/projects', require('./projectRoutes'))
 

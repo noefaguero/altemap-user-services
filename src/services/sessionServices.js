@@ -44,6 +44,15 @@ const deleteSession = async (refreshToken) => {
     }
 }
 
+const getSessionByRefreshToken = async (refreshToken) => {
+    try {
+        const session = await Session.findOne({ refresh_token: refreshToken }).lean()
+        return session
+    } catch (error) {
+        throw error
+    }
+}
+
 
 module.exports = {
     validateToken,
