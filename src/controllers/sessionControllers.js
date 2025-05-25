@@ -86,11 +86,11 @@ const createSession = async (user, defaultAcc, keep, res) => {
 }
 
 // Generar token de acceso a partir de refresh token
-const refreshSession = async (exp, newAccessToken, newRefreshToken, res) => {
+const refreshSession = async (oldRefreshToken, exp, newAccessToken, newRefreshToken, res) => {
     try {
         
-        // rotar el token de refresco en la base de datos
-        await sessionServices.rotateRefreshToken(refreshToken, newRefreshToken)
+        // rotar refresh token en la base de datos
+        await sessionServices.rotateRefreshToken(oldRefreshToken, newRefreshToken)
 
         // tiempo restante hasta la expiración del refresh token
         const currentTime = Math.floor(Date.now() / 1000) // segundos
@@ -171,34 +171,37 @@ const recoverSession = async (req, res) => {
             return res.status(404).json({ error: 'Usuario no encontrado' })
         }
 
-        // expiración del refresh token
-        let exp
-        if (refreshToken) {
-            const session = await sessionServices.getSessionByRefreshToken(refreshToken)
-            if (!session) {
-                return res.status(401).json({ error: 'Refresh token inválido' })
-            }
-            exp = session.expires_at.getTime()
-        }
-
         // acceso por defecto al primer proyecto
         const defaultAcc = user.accreditations[0]
 
-        if (refreshToken) {
+        // casos de uso
+        let exp
+        if (refreshToken && !accessToken) {
+            // 1. solo refresh token: requiere refrescar la sesión
+            // consultar expiración del refresh token
+            const session = await sessionServices.getSessionByRefreshToken(refreshToken)
+            if (!session) {
+                return res.status(401).json({ error: 'REFRESH TOKEN EXPIRADO' })
+            }
+            exp = session.expires_at.getTime()
+            
+            // renovar tokens
             const { 
                 accessToken: newAccessToken, 
                 refreshToken: newRefreshToken 
             } = createTokens(
-                req.pass.user,
-                req.pass.role,
+                req.user,
+                req.role,
                 defaultAcc.project_id.toHexString(),
                 defaultAcc.permission,
                 true,
                 exp
             )
 
-            await refreshSession(exp, newAccessToken, newRefreshToken, res)
+            // refrescar la sesión
+            await refreshSession(refreshToken, exp, newAccessToken, newRefreshToken, res)
         }
+        // 2. si existe access token válido: se envían directamente los datos de sesión
         
         res.json({ 
             ...user,
@@ -216,7 +219,7 @@ const recoverSession = async (req, res) => {
 const switchWorkspace = async (req, res) => {
     try {
         const accId = req.body.acc_id
-        const accessToken = req.cookies?.access_token
+        const accessToken = getCookie(req.headers.cookie, 'access_token')
         
         // validación
         if (!accId || !accessToken) {
@@ -253,19 +256,17 @@ const switchWorkspace = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        const refreshToken = req.cookies?.refresh_token
+        const refreshToken = getCookie(req.headers.cookie, 'refresh_token')
 
-        if (!refreshToken) {
-            return res.status(400).json({ error: "Refresh token requerido" })
+        if (refreshToken) {
+            // revocar refresh token en la base de datos
+            await sessionServices.deleteSession(refreshToken)
         }
 
-        // revocar refresh token en la base de datos
-        await sessionServices.deleteSession(refreshToken)
-        
         // eliminar las cookies en el navegador
         res.clearCookie('refresh_token')
         res.clearCookie('access_token')
-        
+
         res.json({ message: "Sesión cerrada correctamente" })
 
     } catch (error) {

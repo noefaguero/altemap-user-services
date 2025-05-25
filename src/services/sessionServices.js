@@ -58,5 +58,6 @@ module.exports = {
     validateToken,
     createSession,
     rotateRefreshToken,
-    deleteSession
+    deleteSession,
+    getSessionByRefreshToken
 }

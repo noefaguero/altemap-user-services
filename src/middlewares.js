@@ -15,9 +15,9 @@ exports.reqLogger = () => {
         if (process.env.NODE_ENV !== 'development') {
             return next()
         }
-        console.log(`REQUEST: ${req.method} ${req.protocol}://${req.get('Host')}${req.originalUrl}`)
-        if (req.body) {
-            console.log(`body: ${JSON.stringify(req.body)}`)
+        console.log(`\tREQUEST: ${req.method} ${req.protocol}://${req.get('Host')}${req.originalUrl}`)
+        if (req.body && Object.keys(req.body).length > 0) {
+            console.log(`\tbody: ${JSON.stringify(req.body)}`)
         }
         next()
     }
